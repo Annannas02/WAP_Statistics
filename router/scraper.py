@@ -25,8 +25,8 @@ class RouterScraper:
     def scrape_all(self):
         html = self.get_iframe_html("html/ssmp/deviceinfo/deviceinfo.asp")
         data = parse_device_info(html)
-        for entry in data:
-            print(entry)
+        for key, value in data.items():
+            print(f"{key}: {value}")
 
     def quit(self):
         self.driver.quit()

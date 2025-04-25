@@ -2,16 +2,23 @@ from bs4 import BeautifulSoup
 
 def parse_device_info(html: str):
     soup = BeautifulSoup(html, 'html.parser')
-    rows = soup.find_all('tr')
-    results = []
-    for row in rows:
-        cols = row.find_all('td')
-        if len(cols) >= 5:
-            results.append({
-                "hostname": cols[0].text.strip(),
-                "ip": cols[1].text.strip(),
-                "mac": cols[2].text.strip(),
-                "status": cols[3].text.strip(),
-                "duration": cols[4].text.strip(),
-            })
-    return results
+    def get(id):  # Helper to safely extract by ID
+        tag = soup.find(id=id)
+        return tag.text.strip() if tag else None
+
+    return {
+        "device_type": get("td1_2"),
+        "description": get("td2_2"),
+        "serial_number": get("td3_2"),
+        "hardware_version": get("td4_2"),
+        "software_version": get("td5_2"),
+        "manufacture_info": get("td6_2"),
+        "registration_status": get("td7_2"),
+        "ont_id": get("td8_2"),
+        "cpu_usage": get("td9_2"),
+        "memory_usage": get("td10_2"),
+        "system_time": get("td14_2"),
+        "custom_info": get("td13_2"),
+        "ip_address": get("td21_2"),  # Optional (present in some configs)
+        "uptime": get("ShowTime")     # Hidden by default, but Selenium captures it if JS loads it
+    }
