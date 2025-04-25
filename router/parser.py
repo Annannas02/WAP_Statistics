@@ -1,24 +1,43 @@
 from bs4 import BeautifulSoup
+from .data_models import DeviceInfo
+import re
 
-def parse_device_info(html: str):
+def parse_device_list(html: str):
     soup = BeautifulSoup(html, 'html.parser')
-    def get(id):  # Helper to safely extract by ID
-        tag = soup.find(id=id)
-        return tag.text.strip() if tag else None
+    rows = soup.select("tr.trTabContent")
+    devices = []
+    for row in rows:
+        cols = row.find_all("td")
+        if len(cols) >= 6:
+            devices.append({
+                "hostname": cols[0].get("title", "").strip(),
+                "port_id": cols[1].get("title", "").strip(),
+                "device_type": cols[2].get("title", "").strip(),
+                "ip": cols[3].get("title", "").strip(),
+                "mac": cols[4].get("title", "").strip(),
+                "status": cols[5].get("title", "").strip(),
+            })
+    return devices
 
-    return {
-        "device_type": get("td1_2"),
-        "description": get("td2_2"),
-        "serial_number": get("td3_2"),
-        "hardware_version": get("td4_2"),
-        "software_version": get("td5_2"),
-        "manufacture_info": get("td6_2"),
-        "registration_status": get("td7_2"),
-        "ont_id": get("td8_2"),
-        "cpu_usage": get("td9_2"),
-        "memory_usage": get("td10_2"),
-        "system_time": get("td14_2"),
-        "custom_info": get("td13_2"),
-        "ip_address": get("td21_2"),  # Optional (present in some configs)
-        "uptime": get("ShowTime")     # Hidden by default, but Selenium captures it if JS loads it
-    }
+def parse_device_details(html: str):
+    soup = BeautifulSoup(html, 'html.parser')
+    def get_value(label):
+        cell = soup.find("td", string=label)
+        return cell.find_next_sibling("td").text.strip() if cell else "--"
+
+    return DeviceInfo(
+        hostname=get_value("Host Name:"),
+        ip=get_value("IP Address:"),
+        mac=get_value("MAC Address:"),
+        port_type=get_value("Port Type:"),
+        status=get_value("Device Status:")
+    )
+
+def extract_total_pages(html: str) -> int:
+    soup = BeautifulSoup(html, 'html.parser')
+    text = soup.get_text()
+    # Look for the pattern like "1/2"
+    match = re.search(r'(\d+)\s*/\s*(\d+)', text)
+    if match:
+        return int(match.group(2))
+    return 1  # Fallback if not found
