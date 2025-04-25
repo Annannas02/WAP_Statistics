@@ -1,0 +1,52 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+.env
+.env.*
+
+# Selenium driver logs
+geckodriver.log
+
+# VSCode settings
+.vscode/
+
+config.py
+
+# Test artifacts
+*.log
+*.sqlite3
+*.db
+*.csv
+*.json
+*.xml
+
+# Mac / Linux / Windows OS files
+.DS_Store
+Thumbs.db
+
+# Compiled output
+*.so
+*.out
+*.o
+
+# HTML outputs & scraped dumps
+/data/*.html
+
+# Cache and history
+*.bak
+*.swp
+*.swo
+.nfs*
+
+# PyInstaller or packaging output
+build/
+dist/
+*.egg-info/
+
+# IDEs & notebooks
+.idea/
+*.ipynb_checkpoints/
