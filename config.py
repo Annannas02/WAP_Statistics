@@ -4,5 +4,5 @@ import os
 load_dotenv()
 
 ROUTER_URL = os.getenv("ROUTER_URL")
-USERNAME = os.getenv("USERNAME")
+USERNAME = "root"
 PASSWORD = os.getenv("PASSWORD")

@@ -67,7 +67,7 @@ class RouterScraper:
                 print(device_info)
                 all_devices.append(device_info)  # <<== missing line
                 global_index += 1
-
+        print(all_devices)
         return all_devices
     def quit(self):
         self.driver.quit()
