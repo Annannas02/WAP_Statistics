@@ -19,28 +19,58 @@ def parse_device_list(html: str):
             })
     return devices
 
-def parse_device_details(html: str):
+def parse_device_details(html: str) -> DeviceInfo:
     soup = BeautifulSoup(html, 'html.parser')
+
     def get_value(label):
         cell = soup.find("td", string=label)
         return cell.find_next_sibling("td").text.strip() if cell else "--"
 
+    hostname = get_value("Host Name:")
+    ip = get_value("IP Address:")
+    mac = get_value("MAC Address:")
+    port_type = get_value("Port Type:")
+    status = get_value("Device Status:")
+
+    # Get online duration from the div with id ShowOnlineTimeInfo
+    online_minutes = 0
+    duration_container = soup.find(id="ShowOnlineTimeInfo")
+    if duration_container:
+        duration_td = duration_container.find_all("td")
+        if len(duration_td) >= 2:
+            duration_text = duration_td[1].text.strip()
+            online_minutes = parse_duration_to_minutes(duration_text)
+
     return DeviceInfo(
-        hostname=get_value("Host Name:"),
-        ip=get_value("IP Address:"),
-        mac=get_value("MAC Address:"),
-        port_type=get_value("Port Type:"),
-        status=get_value("Device Status:")
+        hostname=hostname,
+        ip=ip,
+        mac=mac,
+        port_type=port_type,
+        status=status,
+        duration=online_minutes
     )
+
+def parse_duration_to_minutes(duration_str: str) -> int:
+    """Parses a duration like '5 hours 41 minutes' into total minutes."""
+    hours = 0
+    minutes = 0
+    hour_match = re.search(r"(\d+)\s*hour", duration_str, re.IGNORECASE)
+    minute_match = re.search(r"(\d+)\s*minute", duration_str, re.IGNORECASE)
+
+    if hour_match:
+        hours = int(hour_match.group(1))
+    if minute_match:
+        minutes = int(minute_match.group(1))
+
+    return hours * 60 + minutes
 
 def extract_total_pages(html: str) -> int:
     soup = BeautifulSoup(html, 'html.parser')
     text = soup.get_text()
-    # Look for the pattern like "1/2"
     match = re.search(r'(\d+)\s*/\s*(\d+)', text)
     if match:
         return int(match.group(2))
-    return 1  # Fallback if not found
+    return 1
 
 def parse_neighbor_aps(html: str) -> list[dict]:
 

@@ -7,3 +7,4 @@ class DeviceInfo:
     mac: str
     port_type: str
     status: str
+    duration: str  # NEW FIELD!

@@ -54,7 +54,7 @@ class RouterScraper:
         print(f"Found {total_pages} page(s) of devices.")
 
         all_devices: list[DeviceInfo] = []
-        global_index = 0  # << Track the total device index across pages
+        global_index = 0
 
         for page in range(1, total_pages + 1):
             print(f"Scraping page {page}...")
@@ -65,7 +65,6 @@ class RouterScraper:
                 detail_html = self.get_page_html(f"html/bbsp/userdevinfo/userdetdevinfo.asp?{global_index}?{page}")
                 device_info = parse_device_details(detail_html)
                 print(device_info)
-                all_devices.append(device_info)
                 global_index += 1
 
         return all_devices
