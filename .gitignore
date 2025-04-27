@@ -50,3 +50,5 @@ dist/
 # IDEs & notebooks
 .idea/
 *.ipynb_checkpoints/
+
+.env

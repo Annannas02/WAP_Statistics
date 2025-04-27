@@ -65,6 +65,7 @@ class RouterScraper:
                 detail_html = self.get_page_html(f"html/bbsp/userdevinfo/userdetdevinfo.asp?{global_index}?{page}")
                 device_info = parse_device_details(detail_html)
                 print(device_info)
+                all_devices.append(device_info)  # <<== missing line
                 global_index += 1
 
         return all_devices
