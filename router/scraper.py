@@ -2,12 +2,9 @@ import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.service import Service
-from .parser import parse_device_list, parse_device_details, extract_total_pages
+from .parser import parse_device_list, parse_device_details, extract_total_pages, parse_dhcp_server_info, parse_wlan_packets, parse_eth_packets, parse_device_name, parse_dhcp_info
 from .data_models import DeviceInfo
-from bs4 import BeautifulSoup
 from .parser import parse_neighbor_aps
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 
 class RouterScraper:
     def __init__(self, base_url: str):
@@ -71,3 +68,16 @@ class RouterScraper:
         return all_devices
     def quit(self):
         self.driver.quit()
+
+    def scrape_router_summary(self) -> dict:
+        summary = {}
+
+        summary["device_info"] = parse_device_name(self.get_page_html("html/ssmp/deviceinfo/deviceinfo.asp"))
+        
+        summary["dhcp_info"] = parse_dhcp_info(self.get_page_html("html/bbsp/dhcpinfo/dhcpinfo.asp"))
+        summary["dhcp_server_info"] =  parse_dhcp_server_info(self.get_page_html("html/bbsp/dhcpservercfg/dhcp2.asp"))
+
+        summary["eth_packets"] =  parse_eth_packets (self.get_page_html("html/amp/ethinfo/ethinfo.asp"))
+        summary["wlan_info"] = parse_wlan_packets(self.get_page_html("html/amp/wlaninfo/wlaninfo.asp"))
+
+        return summary

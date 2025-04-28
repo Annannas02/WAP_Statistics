@@ -486,6 +486,18 @@ def filter_devices():
         "entries": filtered
     })
 
+@app.route('/router/summary', methods=['GET'])
+def router_summary():
+    scraper = RouterScraper(ROUTER_URL)
+    try:
+        scraper.login(USERNAME, PASSWORD)
+        summary = scraper.scrape_router_summary()
+        return jsonify(summary)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        scraper.quit()
+
 
 def parse_datetime_safe(value: str):
     if not value:
@@ -494,3 +506,4 @@ def parse_datetime_safe(value: str):
         return datetime.fromisoformat(value)
     except ValueError:
         return None
+    

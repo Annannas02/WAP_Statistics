@@ -96,3 +96,110 @@ def parse_neighbor_aps(html: str) -> list[dict]:
             "max_rate": cells[10].text.strip(),
         })
     return results
+
+def parse_dhcp_server_info(html: str) -> dict:
+    soup = BeautifulSoup(html, "html.parser")
+    host_ip = ""
+    subnet_mask = ""
+
+    ip_cell = soup.find("td", string="LAN Host IP Address:")
+    if ip_cell:
+        host_ip = ip_cell.find_next_sibling("td").text.strip()
+
+    mask_cell = soup.find("td", string="Subnet Mask:")
+    if mask_cell:
+        subnet_mask = mask_cell.find_next_sibling("td").text.strip()
+
+    return {
+        "host_ip": host_ip,
+        "subnet_mask": subnet_mask
+    }
+
+def parse_dhcp_info(html: str):
+    soup = BeautifulSoup(html, 'html.parser')
+
+    total_ip_addresses = int(soup.find(id="lanuser_TotalIpNum").text.strip())
+    eth_ip_addresses = int(soup.find(id="lanuser_EthPortIpNum").text.strip())
+    wifi_ip_addresses = int(soup.find(id="lanuser_WifiPortIpNum").text.strip())
+    remaining_ip_addresses = int(soup.find(id="lanuser_LeftIpAddrNum").text.strip())
+
+    return {
+        "total_ip_addresses": total_ip_addresses,
+        "eth_ip_addresses": eth_ip_addresses,
+        "wifi_ip_addresses": wifi_ip_addresses,
+        "remaining_ip_addresses": remaining_ip_addresses,
+    }
+
+def parse_device_name(html: str) -> str:
+    soup = BeautifulSoup(html, "html.parser")
+    device_name_tag = soup.find("td", id="td1_2")
+    if device_name_tag:
+        return {"device_name": device_name_tag.text.strip()}
+    return ""
+
+def parse_eth_packets(html: str):
+    soup = BeautifulSoup(html, "html.parser")
+    ports_info = []
+
+    # Ethernet statistics are under userEthInfos[] JavaScript object
+    # But the visible table in HTML contains them too
+    table = soup.find("table", id="eth_status_table")
+    if not table:
+        return ports_info
+
+    rows = table.find_all("tr")[2:]  # Skip the headers
+    for row in rows:
+        cols = row.find_all("td")
+        if len(cols) >= 7:
+            port_info = {
+                "port_number": cols[0].text.strip(),
+                "mode": cols[1].text.strip(),
+                "speed": cols[2].text.strip(),
+                "link": cols[3].text.strip(),
+                "rx_bytes": cols[4].text.strip(),
+                "rx_packets": cols[5].text.strip(),
+                "tx_bytes": cols[6].text.strip(),
+                "tx_packets": cols[7].text.strip(),
+            }
+            ports_info.append(port_info)
+
+    return ports_info
+
+def parse_wlan_packets(html: str):
+    soup = BeautifulSoup(html, "html.parser")
+    wlan_info = []
+
+    table = soup.find("table", id="wlan_pkts_statistic_table")
+    if not table:
+        return wlan_info
+
+    rows = table.find_all("tr")[2:]  # Skip header rows
+    for row in rows:
+        cols = row.find_all("td")
+        if len(cols) >= 5:
+            wlan_entry = {
+                "ssid_index": cols[0].text.strip(),
+                "ssid_name": cols[1].text.strip(),
+                "rx_bytes": cols[2].text.strip(),
+                "rx_packets": cols[3].text.strip(),
+                "rx_discarded": cols[5].text.strip(),
+                "tx_bytes": cols[6].text.strip(),
+                "tx_packets": cols[7].text.strip(),
+                "tx_discarded": cols[9].text.strip(),
+            }
+            wlan_info.append(wlan_entry)
+    
+    enc_table = soup.find("table", id="wlan_ssidinfo_table")
+    if not table:
+        return wlan_info
+
+    rows = enc_table.find_all("tr")[1:]  # Skip header rows
+    for row in rows:
+        cols = row.find_all("td")
+        if len(cols) >= 5:
+            wlan_entry2 = {
+                "auth_mode": cols[3].text.strip(),
+                "encryption_mode": cols[4].text.strip(),
+            }
+            wlan_info.append(wlan_entry2)
+    return wlan_info
