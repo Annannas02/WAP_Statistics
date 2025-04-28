@@ -82,12 +82,15 @@ def parse_neighbor_aps(html: str) -> list[dict]:
         cells = row.find_all("td")
         if len(cells) < 11:
             continue
+        signal_text = cells[4].text.strip()
+        signal_match = re.search(r'-?\d+', signal_text)
+        signal_value = int(signal_match.group()) if signal_match else None
         results.append({
             "ssid": cells[0].text.strip(),
             "mac": cells[1].text.strip(),
             "network_type": cells[2].text.strip(),
             "channel": cells[3].text.strip(),
-            "signal_strength": cells[4].text.strip(),
+            "signal_strength": signal_value,
             "noise": cells[5].text.strip(),
             "dtim": cells[6].text.strip(),
             "beacon_period": cells[7].text.strip(),
