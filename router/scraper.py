@@ -5,12 +5,15 @@ from selenium.webdriver.firefox.service import Service
 from .parser import parse_device_list, parse_device_details, extract_total_pages, parse_dhcp_server_info, parse_wlan_packets, parse_eth_packets, parse_device_name, parse_dhcp_info
 from .data_models import DeviceInfo
 from .parser import parse_neighbor_aps
+from selenium.webdriver.firefox.options import Options  
 
 class RouterScraper:
     def __init__(self, base_url: str):
         self.base_url = base_url
-        self.driver = webdriver.Firefox(service=Service("geckodriver.exe"))
-
+        options = Options()
+        options.headless = True
+        self.driver = webdriver.Firefox(options=options)
+    
     def login(self, username: str, password: str):
         self.driver.get(self.base_url)
         time.sleep(1)
