@@ -95,6 +95,7 @@ def parse_neighbor_aps(html: str) -> list[dict]:
             "working_mode": cells[9].text.strip(),
             "max_rate": cells[10].text.strip(),
         })
+    print(results)
     return results
 
 def parse_dhcp_server_info(html: str) -> dict:

@@ -2,16 +2,30 @@ from flask import Flask, jsonify, request
 from router.scraper import RouterScraper
 from database.db import init_db, SessionLocal
 from database.models import Device, DeviceSession, NeighborNetwork, NeighborStatus
-from config import ROUTER_URL, USERNAME, PASSWORD
+from config import ROUTER_URL, USERNAME, PASSWORD, COLLECTOR_ENABLED, COLLECTOR_INTERVAL_MINUTES
 from datetime import datetime
 from sqlalchemy import func
-from collections import defaultdict
 from datetime import timedelta
-import math
-from sqlalchemy import and_, or_
+from sqlalchemy import and_
+from collector import start_collector_background, stop_collector_background, is_collector_running
 
 app = Flask(__name__)
 init_db()
+
+@app.route('/collector/start', methods=['POST'])
+def start_collector():
+    start_collector_background(interval_minutes=COLLECTOR_INTERVAL_MINUTES)
+    return jsonify({"status": "collector started"})
+
+@app.route('/collector/stop', methods=['POST'])
+def stop_collector():
+    stop_collector_background()
+    return jsonify({"status": "collector stopped"})
+
+@app.route('/collector/status', methods=['GET'])
+def collector_status():
+    status = "running" if is_collector_running() else "stopped"
+    return jsonify({"collector_status": status})
 
 @app.route('/devices/collect', methods=['POST'])
 def collect_devices():
